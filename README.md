@@ -4,4 +4,4 @@ Credits: Rusjj, erorcun, Guzers
 
 CMD: `/snow`
 
-**PREVIEW**
+### PREVIEW
