@@ -1,2 +1,6 @@
-# LCSSnowMobile
-CV From : https://github.com/AndroidModLoader/LCSSnowMobile
+LCSSnowMobile Monetloader version for GTA SAMP 32bit 
+
+Credits: Rusjj, erorcun, Guzers
+CMD: `/snow`
+
+# PREVIEW
