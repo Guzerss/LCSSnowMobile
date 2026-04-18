@@ -48,9 +48,9 @@ local rwRENDERSTATEFOGENABLE         = 14
 local rwPRIMTYPETRILIST              = 3
 
 local defaultConfig = {
-    visible      = false,
-    densityIdx   = 0,
-    randomness   = 0.5,
+    visible    = false,
+    densityIdx = 0,
+    randomness = 0.5,
 }
 
 local config = cfg.load(defaultConfig, 'LCSSnowMobile')
@@ -73,7 +73,7 @@ do
         {-0.07, 0.00, -0.07, 0.0, 0.0 },
     }
     for i, v in ipairs(vdata) do
-        local sv = snowVertexBuffer[i-1]
+        local sv = snowVertexBuffer[i - 1]
         sv.pos.x = v[1]; sv.pos.y = v[2]; sv.pos.z = v[3]
         sv.normal.x = 0; sv.normal.y = 0; sv.normal.z = 0
         sv.color = white
@@ -95,9 +95,9 @@ local densityValues = {
 
 local currentSnowFlakes = densityValues[config.densityIdx] or densityValues[0]
 
-local ran1        = -0.08
-local ran2        =  0.08
-local iflakes     = 0
+local ran1    = -0.08
+local ran2    =  0.08
+local iflakes = 0
 
 local SW, SH       = getScreenResolution()
 local WinState     = new.bool(false)
@@ -127,7 +127,7 @@ local function addSnow()
     local ok2, playerNoRain = pcall(gta._ZN10CCullZones12PlayerNoRainEv)
     if (ok1 and camNoRain) or (ok2 and playerNoRain) then return end
     if gta._ZN8CWeather14UnderWaternessE > 0 then return end
-    if snowRasterPtr == 0    then return end
+    if snowRasterPtr == 0 then return end
 
     local snowAmount = math.min(currentSnowFlakes, MaxSnowFlakes)
     if snowAmount <= 0 then return end
@@ -164,10 +164,9 @@ local function addSnow()
     snowMat.up.x    = cm.up.x;    snowMat.up.y    = cm.up.y;    snowMat.up.z    = cm.up.z
     snowMat.at.x    = cm.at.x;    snowMat.at.y    = cm.at.y;    snowMat.at.z    = cm.at.z
 
-    local maxChange = 0.03 * gta._ZN6CTimer12ms_fTimeStepE
-    local minChange = -maxChange
-    local rnd       = randomSlider[0]
-
+    local maxChange  = 0.03 * gta._ZN6CTimer12ms_fTimeStepE
+    local minChange  = -maxChange
+    local rnd        = randomSlider[0]
     local updateEvery = math.max(1, math.floor(64 * (1.0 - rnd)))
 
     for i = 0, snowAmount - 1 do
@@ -223,9 +222,7 @@ rainStreaksHook = hook.new(
     'void(*)()',
     function()
         rainStreaksHook()
-        if visible[0] then 
-           pcall(addSnow) 
-        end
+        if visible[0] then pcall(addSnow) end
     end,
     cast('uintptr_t', cast('void*', gta._ZN8CWeather17RenderRainStreaksEv))
 )
@@ -235,38 +232,30 @@ imgui.OnFrame(
     function()
         imgui.SetNextWindowPos(imgui.ImVec2(SW / 2, SH / 2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
         imgui.Begin('LCSSnowMobile', WinState, imgui.WindowFlags.NoCollapse)
-
-        if imgui.Checkbox('Enable', visible) then saveConfig() end
-
         imgui.PushItemWidth(imgui.GetContentRegionAvail().x)
+        if imgui.Checkbox('Enable', visible) then saveConfig() end
         local densityLabels = {'Low', 'Medium', 'High', 'Very High'}
         if imgui.SliderInt('##density', densityIdx, 0, 3, densityLabels[densityIdx[0] + 1]) then
             currentSnowFlakes = densityValues[densityIdx[0]]
             saveConfig()
         end
-
-        if imgui.SliderFloat('##randomness', randomSlider, 0.0, 1.0, 'Randomness: %.2f') then
-            saveConfig()
-        end
+        if imgui.SliderFloat('##randomness', randomSlider, 0.0, 1.0, 'Randomness: %.2f') then saveConfig() end
         imgui.PopItemWidth()
-
         imgui.End()
     end
 )
 
 function main()
-    while not isSampAvailable() do wait(100) end
-
     local tex = gta._Z13RwTextureReadPKcS0_('shad_exp', nil)
     if tex ~= nil then
         snowFlakeTexture = cast('RwTexture*', tex)
         snowFlakeRaster  = snowFlakeTexture.raster
         snowRasterPtr    = tonumber(cast('uintptr_t', snowFlakeRaster))
     end
-
-    sampRegisterChatCommand('snow', function()
-        WinState[0] = not WinState[0]
-    end)
-
-    while true do wait(0) end
+    sampRegisterChatCommand('snow', function() WinState[0] = not WinState[0] end)
+    wait(-1)
 end
+
+addEventHandler('onScriptTerminate', function(scr)
+    if scr == script.this then rainStreaksHook.stop() end
+end)
